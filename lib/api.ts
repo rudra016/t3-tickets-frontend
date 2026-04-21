@@ -21,6 +21,23 @@ class ApiError extends Error {
   }
 }
 
+// UI-only marker: lets proxy.ts know the user *thinks* they're authenticated
+// so the gate can let them past /login without calling the backend. Not a
+// security boundary — the backend still enforces auth on every request via
+// the real HttpOnly session cookie (which lives on the backend origin and is
+// invisible to this middleware).
+const AUTH_MARKER = "t3_logged_in";
+
+function setLoggedInMarker() {
+  if (typeof document === "undefined") return;
+  document.cookie = `${AUTH_MARKER}=1; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+}
+
+function clearLoggedInMarker() {
+  if (typeof document === "undefined") return;
+  document.cookie = `${AUTH_MARKER}=; path=/; max-age=0; SameSite=Lax`;
+}
+
 async function apiFetch<T>(
   path: string,
   init: RequestInit = {}
@@ -43,6 +60,7 @@ async function apiFetch<T>(
       typeof window !== "undefined" &&
       !path.startsWith("/api/auth/")
     ) {
+      clearLoggedInMarker();
       const next = encodeURIComponent(
         window.location.pathname + window.location.search
       );
@@ -98,13 +116,24 @@ export const api = {
   listExploreTickets: () =>
     apiFetch<ExploreTicketsResponse>("/api/explore/tickets"),
 
-  login: (username: string, password: string) =>
-    apiFetch<{ username: string }>("/api/auth/login", {
+  login: async (username: string, password: string) => {
+    const res = await apiFetch<{ username: string }>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ username, password }),
-    }),
+    });
+    setLoggedInMarker();
+    return res;
+  },
 
-  logout: () => apiFetch<{ ok: true }>("/api/auth/logout", { method: "POST" }),
+  logout: async () => {
+    try {
+      return await apiFetch<{ ok: true }>("/api/auth/logout", { method: "POST" });
+    } finally {
+      // Always clear the UI marker even if the server call fails, so the
+      // proxy gate stops letting us past /login.
+      clearLoggedInMarker();
+    }
+  },
 
   me: () => apiFetch<{ username: string }>("/api/auth/me"),
 };

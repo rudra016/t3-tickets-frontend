@@ -1,14 +1,18 @@
-// Route gate: cookie presence check. Anything under `matcher` requires the
-// session cookie; anything else (including /login and static assets) passes
-// through. The backend is the real authority — it verifies every API call —
-// so a forged or expired cookie here only grants access to the SHELL, not to
-// any data.
+// Route gate: presence check on a UI marker cookie set by lib/api.ts after
+// a successful login. We *can't* check the real HttpOnly session cookie here
+// because in prod the frontend and backend live on different origins (Vercel
+// vs Railway) and the session cookie is scoped to the backend origin — this
+// middleware runs on the frontend origin and can't see it.
+//
+// That's fine: the backend re-validates the real session on every API call,
+// so a forged marker only gets someone into the empty app shell; every data
+// fetch will 401 and lib/api.ts bounces them back to /login.
 //
 // In Next 16 this file replaces the old `middleware.ts` convention.
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const COOKIE_NAME = "t3_session";
+const COOKIE_NAME = "t3_logged_in";
 
 export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
