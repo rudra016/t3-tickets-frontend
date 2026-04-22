@@ -26,6 +26,7 @@ import {
   LuSparkles,
   LuCompass,
   LuLogOut,
+  LuShieldCheck,
 } from "react-icons/lu";
 
 import { api } from "@/lib/api";
@@ -38,6 +39,8 @@ const NAV = [
         hint: "Browse and select T3 tickets for analysis" },
       { href: "/analyses", icon: LuListChecks, title: "Analyses",
         hint: "Past and active runs" },
+      { href: "/validate", icon: LuShieldCheck, title: "Validate tickets",
+        hint: "Spot-check the classifier on a random sample" },
     ],
   },
 ];

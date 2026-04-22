@@ -116,6 +116,26 @@ export const api = {
   listExploreTickets: () =>
     apiFetch<ExploreTicketsResponse>("/api/explore/tickets"),
 
+  // ---- Validation flow ----
+  // Same classifier brain as the main flow; runs are tagged kind=validation
+  // so they don't mix into the standard analyses/explore views.
+  randomValidationTickets: (limit: 10 | 20 | 30) =>
+    apiFetch<TicketListResponse & { pool_size: number; limit: number }>(
+      `/api/validate/tickets/random?limit=${limit}`
+    ),
+
+  startValidation: (ticketIds: string[]) =>
+    apiFetch<AnalysisRun>("/api/validate/analyses", {
+      method: "POST",
+      body: JSON.stringify({ ticket_ids: ticketIds }),
+    }),
+
+  listValidationRuns: () =>
+    apiFetch<{ analyses: AnalysisRun[] }>("/api/validate/analyses"),
+
+  listValidationTickets: () =>
+    apiFetch<ExploreTicketsResponse>("/api/validate/explore/tickets"),
+
   login: async (username: string, password: string) => {
     const res = await apiFetch<{ username: string }>("/api/auth/login", {
       method: "POST",

@@ -34,9 +34,12 @@ export interface TicketListResponse {
   tickets: TicketListItem[];
 }
 
+export type RunKind = "standard" | "validation";
+
 export interface AnalysisRun {
   id: number;
   status: AnalysisStatus;
+  kind?: RunKind;
   total_tickets: number;
   processed_tickets: number;
   failed_tickets: number;
