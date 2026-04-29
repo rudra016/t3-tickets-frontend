@@ -479,7 +479,11 @@ function LabelRow({
         {label}
       </div>
       <div className="flex items-center gap-1 text-sm">
-        <span>{value == null || value === "" ? "—" : String(value)}</span>
+        {value == null || value === "" ? (
+          <span className="italic text-muted-foreground">Unset</span>
+        ) : (
+          <span>{String(value)}</span>
+        )}
         {match === true ? (
           <span className="rounded-full bg-emerald-500/15 px-1.5 text-[10px] text-emerald-700 dark:text-emerald-300">
             match
