@@ -233,53 +233,65 @@ export function TicketDrawer({
                           </p>
                         </>
                       ) : null}
-
-                      <SectionLabel title="Agent labels (ground truth)" />
-                      <div className="grid grid-cols-2 gap-3 text-xs">
-                        <LabelRow
-                          label="T3 Issue Origin"
-                          value={cleaned?.labels?.t3_issue_origin}
-                          match={matchOrUndefined(
-                            cleaned?.labels?.t3_issue_origin,
-                            classification.inferred_issue_origin,
-                          )}
-                        />
-                        {isNewDept(cleaned?.department_id) ? (
-                          <LabelRow
-                            label="T3 Issue Resolution"
-                            value={cleaned?.labels?.t3_issue_resolution}
-                            match={matchOrUndefined(
-                              cleaned?.labels?.t3_issue_resolution,
-                              classification.inferred_issue_resolution,
-                            )}
-                          />
-                        ) : (
-                          <>
-                            <LabelRow
-                              label="T3 Issue Type"
-                              value={cleaned?.labels?.t3_issue_type}
-                            />
-                            <LabelRow
-                              label="Sub-issue"
-                              value={cleaned?.labels?.t3_sub_issue_type}
-                            />
-                          </>
-                        )}
-                        <LabelRow
-                          label="Vertical"
-                          value={cleaned?.labels?.vertical}
-                        />
-                        <LabelRow
-                          label="Tech needed (agent)"
-                          value={renderYesNo(cleaned?.labels?.tech_needed)}
-                        />
-                      </div>
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       Not classified yet.
                     </p>
                   )}
+
+                  {cleaned ? (
+                    <>
+                      <SectionLabel title="Agent labels (ground truth)" />
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <LabelRow
+                          label="T3 Issue Origin"
+                          value={cleaned.labels?.t3_issue_origin}
+                          match={
+                            classification
+                              ? matchOrUndefined(
+                                  cleaned.labels?.t3_issue_origin,
+                                  classification.inferred_issue_origin,
+                                )
+                              : undefined
+                          }
+                        />
+                        {isNewDept(cleaned.department_id) ? (
+                          <LabelRow
+                            label="T3 Issue Resolution"
+                            value={cleaned.labels?.t3_issue_resolution}
+                            match={
+                              classification
+                                ? matchOrUndefined(
+                                    cleaned.labels?.t3_issue_resolution,
+                                    classification.inferred_issue_resolution,
+                                  )
+                                : undefined
+                            }
+                          />
+                        ) : (
+                          <>
+                            <LabelRow
+                              label="T3 Issue Type"
+                              value={cleaned.labels?.t3_issue_type}
+                            />
+                            <LabelRow
+                              label="Sub-issue"
+                              value={cleaned.labels?.t3_sub_issue_type}
+                            />
+                          </>
+                        )}
+                        <LabelRow
+                          label="Vertical"
+                          value={cleaned.labels?.vertical}
+                        />
+                        <LabelRow
+                          label="Tech needed (agent)"
+                          value={renderYesNo(cleaned.labels?.tech_needed)}
+                        />
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               </ScrollArea>
             </TabsContent>
