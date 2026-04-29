@@ -12,9 +12,11 @@ import {
   LuLoader,
   LuChevronLeft,
   LuChevronRight,
+  LuEye,
 } from "react-icons/lu";
 
 import { PageHeader } from "@/components/page-header";
+import { TicketDrawer } from "@/components/analysis/ticket-drawer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -64,6 +66,7 @@ export default function TicketsPage() {
   const [search, setSearch] = useState("");
   const [searchHits, setSearchHits] = useState<TicketListItem[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("Closed");
+  const [previewTicketId, setPreviewTicketId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [starting, startTransition] = useTransition();
@@ -286,13 +289,14 @@ export default function TicketsPage() {
                     <TableHead className="w-20 text-right">Threads</TableHead>
                     <TableHead className="w-20 text-right">Comments</TableHead>
                     <TableHead className="w-28">Created</TableHead>
+                    <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading && !tickets ? (
                     Array.from({ length: 8 }).map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 8 }).map((_, j) => (
+                        {Array.from({ length: 9 }).map((_, j) => (
                           <TableCell key={j}>
                             <Skeleton className="h-4 w-full" />
                           </TableCell>
@@ -301,7 +305,7 @@ export default function TicketsPage() {
                     ))
                   ) : filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8}>
+                      <TableCell colSpan={9}>
                         <div className="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">
                           <span>No tickets match the current filters.</span>
                           <Button
@@ -361,6 +365,17 @@ export default function TicketsPage() {
                           <TableCell className="text-xs text-muted-foreground">
                             {formatRelative(t.created_time)}
                           </TableCell>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="ghost"
+                              size="xs"
+                              onClick={() => setPreviewTicketId(t.id)}
+                              aria-label={`Preview ${t.ticket_number ?? t.id}`}
+                              title="Preview ticket"
+                            >
+                              <LuEye className="size-3.5" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       );
                     })
@@ -399,6 +414,15 @@ export default function TicketsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <TicketDrawer
+        analysisId={0}
+        ticketId={previewTicketId}
+        open={previewTicketId !== null}
+        onOpenChange={(o) => {
+          if (!o) setPreviewTicketId(null);
+        }}
+      />
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center p-4">
         <div
