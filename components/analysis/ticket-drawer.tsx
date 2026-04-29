@@ -236,34 +236,39 @@ export function TicketDrawer({
                         <LabelRow
                           label="T3 Issue Origin"
                           value={cleaned?.labels?.t3_issue_origin}
-                          match={
-                            cleaned?.labels?.t3_issue_origin ===
-                            classification.inferred_issue_origin
-                          }
+                          match={matchOrUndefined(
+                            cleaned?.labels?.t3_issue_origin,
+                            classification.inferred_issue_origin,
+                          )}
                         />
-                        <LabelRow
-                          label="T3 Issue Resolution"
-                          value={cleaned?.labels?.t3_issue_resolution}
-                          match={
-                            cleaned?.labels?.t3_issue_resolution ===
-                            classification.inferred_issue_resolution
-                          }
-                        />
-                        <LabelRow
-                          label="T3 Issue Type"
-                          value={cleaned?.labels?.t3_issue_type}
-                        />
-                        <LabelRow
-                          label="Sub-issue"
-                          value={cleaned?.labels?.t3_sub_issue_type}
-                        />
+                        {isNewDept(cleaned?.department_id) ? (
+                          <LabelRow
+                            label="T3 Issue Resolution"
+                            value={cleaned?.labels?.t3_issue_resolution}
+                            match={matchOrUndefined(
+                              cleaned?.labels?.t3_issue_resolution,
+                              classification.inferred_issue_resolution,
+                            )}
+                          />
+                        ) : (
+                          <>
+                            <LabelRow
+                              label="T3 Issue Type"
+                              value={cleaned?.labels?.t3_issue_type}
+                            />
+                            <LabelRow
+                              label="Sub-issue"
+                              value={cleaned?.labels?.t3_sub_issue_type}
+                            />
+                          </>
+                        )}
                         <LabelRow
                           label="Vertical"
                           value={cleaned?.labels?.vertical}
                         />
                         <LabelRow
                           label="Tech needed (agent)"
-                          value={cleaned?.labels?.tech_needed}
+                          value={renderYesNo(cleaned?.labels?.tech_needed)}
                         />
                       </div>
                     </>
@@ -435,6 +440,28 @@ function SectionLabel({
       {title}
     </div>
   );
+}
+
+const NEW_DEPT_ID = "136328001653862461";
+
+function isNewDept(deptId: unknown): boolean {
+  return deptId == null || String(deptId) === NEW_DEPT_ID;
+}
+
+function matchOrUndefined(
+  truth: unknown,
+  inferred: unknown,
+): boolean | undefined {
+  if (truth == null || truth === "") return undefined;
+  return truth === inferred;
+}
+
+function renderYesNo(value: unknown): unknown {
+  if (value == null || value === "") return value;
+  const s = String(value).trim().toLowerCase();
+  if (["yes", "true", "1"].includes(s)) return "Yes";
+  if (["no", "false", "0"].includes(s)) return "No";
+  return value;
 }
 
 function LabelRow({
