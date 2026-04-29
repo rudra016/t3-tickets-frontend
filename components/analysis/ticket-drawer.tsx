@@ -52,8 +52,11 @@ export function TicketDrawer({
     setDetail(null);
     setError(null);
     setLoading(true);
-    api
-      .getTicketAnalysis(analysisId, ticketId)
+    const fetcher =
+      analysisId > 0
+        ? api.getTicketAnalysis(analysisId, ticketId)
+        : api.previewTicket(ticketId);
+    fetcher
       .then((d) => {
         if (!cancelled) setDetail(d);
       })

@@ -13,9 +13,11 @@ import {
   LuShuffle,
   LuHistory,
   LuClock,
+  LuEye,
 } from "react-icons/lu";
 
 import { PageHeader } from "@/components/page-header";
+import { TicketDrawer } from "@/components/analysis/ticket-drawer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,6 +63,7 @@ export default function ValidatePage() {
   const [starting, startTransition] = useTransition();
   const [history, setHistory] = useState<AnalysisRun[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [previewTicketId, setPreviewTicketId] = useState<string | null>(null);
 
   async function loadSample(nextSize: Size) {
     setLoading(true);
@@ -219,13 +222,14 @@ export default function ValidatePage() {
                     <TableHead className="w-20 text-right">Threads</TableHead>
                     <TableHead className="w-20 text-right">Comments</TableHead>
                     <TableHead className="w-28">Created</TableHead>
+                    <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading && !tickets ? (
                     Array.from({ length: size }).map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 7 }).map((_, j) => (
+                        {Array.from({ length: 8 }).map((_, j) => (
                           <TableCell key={j}>
                             <Skeleton className="h-4 w-full" />
                           </TableCell>
@@ -234,7 +238,7 @@ export default function ValidatePage() {
                     ))
                   ) : !tickets || tickets.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7}>
+                      <TableCell colSpan={8}>
                         <div className="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">
                           <span>No closed tickets available to sample.</span>
                         </div>
@@ -278,6 +282,17 @@ export default function ValidatePage() {
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {formatRelative(t.created_time)}
+                          </TableCell>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="ghost"
+                              size="xs"
+                              onClick={() => setPreviewTicketId(t.id)}
+                              aria-label={`Preview ${t.ticket_number ?? t.id}`}
+                              title="Preview ticket"
+                            >
+                              <LuEye className="size-3.5" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       );
@@ -358,6 +373,15 @@ export default function ValidatePage() {
           </CardContent>
         </Card>
       </div>
+
+      <TicketDrawer
+        analysisId={0}
+        ticketId={previewTicketId}
+        open={previewTicketId !== null}
+        onOpenChange={(o) => {
+          if (!o) setPreviewTicketId(null);
+        }}
+      />
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center p-4">
         <div

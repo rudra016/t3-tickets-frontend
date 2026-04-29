@@ -62,6 +62,7 @@ export default function TicketsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
+  const [searchHits, setSearchHits] = useState<TicketListItem[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("Closed");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -96,16 +97,42 @@ export default function TicketsPage() {
     setPage(1);
   }, [statusFilter, pageSize]);
 
+  // Backend-side ticket-number lookup so the user can find a ticket that
+  // isn't on the current page. Triggers when the query looks like a ticket
+  // number (with or without a leading "#"). Debounced to keep typing snappy.
+  useEffect(() => {
+    const q = search.trim().replace(/^#+/, "");
+    if (!q || !/^\d+$/.test(q)) {
+      setSearchHits([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const res = await api.searchTickets(q);
+        setSearchHits(res.tickets);
+      } catch {
+        setSearchHits([]);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [search]);
+
   const filtered = useMemo(() => {
     if (!tickets) return [];
-    const q = search.trim().toLowerCase();
-    if (!q) return tickets;
-    return tickets.filter((t) =>
+    // "#1234" and "1234" should match the same set.
+    const q = search.trim().replace(/^#+/, "").toLowerCase();
+    const seen = new Set(tickets.map((t) => t.id));
+    const merged = [
+      ...tickets,
+      ...searchHits.filter((t) => !seen.has(t.id)),
+    ];
+    if (!q) return merged;
+    return merged.filter((t) =>
       [t.subject, t.ticket_number, t.status, t.channel]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q))
     );
-  }, [tickets, search]);
+  }, [tickets, search, searchHits]);
 
   const toggle = (id: string) => {
     setSelected((prev) => {

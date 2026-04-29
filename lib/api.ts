@@ -93,6 +93,14 @@ export const api = {
     return apiFetch<TicketListResponse>(`/api/tickets${q ? `?${q}` : ""}`);
   },
 
+  searchTickets: (ticketNumber: string) => {
+    const qs = new URLSearchParams({ ticket_number: ticketNumber });
+    return apiFetch<TicketListResponse>(`/api/tickets/search?${qs.toString()}`);
+  },
+
+  previewTicket: (ticketId: string) =>
+    apiFetch<TicketAnalysisDetail>(`/api/tickets/${ticketId}/preview`),
+
   startAnalysis: (ticketIds: string[]) =>
     apiFetch<AnalysisRun>("/api/analyses", {
       method: "POST",
