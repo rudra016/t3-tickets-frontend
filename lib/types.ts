@@ -132,16 +132,43 @@ export interface TicketClassification {
   resolution?: string | null;
   inferred_issue_origin?: string | null;
   inferred_issue_resolution?: string | null;
+  inferred_issue_type?: string | null;
+  inferred_sub_issue_type?: string | null;
   tech_visit_required?: boolean | null;
   confidence?: number | null;
   reasoning?: string | null;
   flags?: string[] | null;
   _model?: string;
+  _source?: "classifier" | "agent_labels" | string;
   _usage?: {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
   };
+}
+
+export interface HierarchyTicket {
+  analysis_id: number;
+  ticket_id: string;
+  ticket_number: string | null;
+  subject: string | null;
+  confidence: number | null;
+  source: "classifier" | "agent_labels" | string | null;
+}
+
+export interface HierarchyNode {
+  label: string;
+  count: number;
+  children?: HierarchyNode[];
+  tickets?: HierarchyTicket[];
+}
+
+export interface HierarchyResponse {
+  dept_id: string;
+  total_tickets: number;
+  label_only_tickets: number;
+  classifier_tickets: number;
+  tree: HierarchyNode[];
 }
 
 export interface TicketAnalysisDetail {

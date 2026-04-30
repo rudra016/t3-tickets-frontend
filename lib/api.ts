@@ -6,6 +6,7 @@ import type {
   AnalysisRun,
   DashboardResponse,
   ExploreTicketsResponse,
+  HierarchyResponse,
   TicketAnalysisDetail,
   TicketListResponse,
 } from "./types";
@@ -123,6 +124,9 @@ export const api = {
 
   listExploreTickets: () =>
     apiFetch<ExploreTicketsResponse>("/api/explore/tickets"),
+
+  getHierarchy: (deptId: string) =>
+    apiFetch<HierarchyResponse>(`/api/hierarchy/${deptId}`),
 
   // ---- Validation flow ----
   // Same classifier brain as the main flow; runs are tagged kind=validation

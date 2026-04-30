@@ -27,6 +27,7 @@ import {
   LuCompass,
   LuLogOut,
   LuShieldCheck,
+  LuFolderTree,
 } from "react-icons/lu";
 
 import { api } from "@/lib/api";
@@ -150,6 +151,18 @@ export function AppSidebar() {
                   <Link href="/explore">
                     <LuCompass />
                     <span>Explore tickets</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/hierarchy")}
+                  tooltip="Issue-type rollup by department"
+                >
+                  <Link href="/hierarchy">
+                    <LuFolderTree />
+                    <span>Issue hierarchy</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
