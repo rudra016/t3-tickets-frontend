@@ -247,6 +247,7 @@ export function TicketDrawer({
                         <LabelRow
                           label="T3 Issue Origin"
                           value={cleaned.labels?.t3_issue_origin}
+                          aiFallback={classification?.inferred_issue_origin}
                           match={
                             classification
                               ? matchOrUndefined(
@@ -260,6 +261,7 @@ export function TicketDrawer({
                           <LabelRow
                             label="T3 Issue Resolution"
                             value={cleaned.labels?.t3_issue_resolution}
+                            aiFallback={classification?.inferred_issue_resolution}
                             match={
                               classification
                                 ? matchOrUndefined(
@@ -274,10 +276,12 @@ export function TicketDrawer({
                             <LabelRow
                               label="T3 Issue Type"
                               value={cleaned.labels?.t3_issue_type}
+                              aiFallback={classification?.inferred_issue_type}
                             />
                             <LabelRow
                               label="Sub-issue"
                               value={cleaned.labels?.t3_sub_issue_type}
+                              aiFallback={classification?.inferred_sub_issue_type}
                             />
                           </>
                         )}
@@ -483,18 +487,32 @@ function LabelRow({
   label,
   value,
   match,
+  aiFallback,
 }: {
   label: string;
   value: unknown;
   match?: boolean;
+  // Shown in italics with an "AI" tag when the rep didn't fill the field
+  // but the classifier inferred something — so the row reads as
+  // "Some iPads down (AI)" rather than the misleading "Unset".
+  aiFallback?: string | null;
 }) {
+  const repBlank = value == null || value === "";
+  const showAi = repBlank && aiFallback != null && aiFallback !== "";
   return (
     <div className="space-y-0.5">
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
         {label}
       </div>
       <div className="flex items-center gap-1 text-sm">
-        {value == null || value === "" ? (
+        {showAi ? (
+          <>
+            <span className="italic text-muted-foreground">{aiFallback}</span>
+            <span className="rounded-full bg-violet-500/15 px-1.5 text-[10px] text-violet-700 dark:text-violet-300">
+              AI
+            </span>
+          </>
+        ) : repBlank ? (
           <span className="italic text-muted-foreground">Unset</span>
         ) : (
           <span>{String(value)}</span>
